@@ -1,6 +1,10 @@
 import React from 'react';
 import ReactCursorPosition from 'react-cursor-position';
 
+const URL = 'ws://localhost:8080/ws/';
+const WS = new WebSocket(URL);
+
+
 export default class CursorTracker extends React.Component {
     render() {
         return (
@@ -12,6 +16,7 @@ export default class CursorTracker extends React.Component {
 }
 
 const PositionLabel = (props) => {
+
     const {
         detectedEnvironment: {
             isMouseDetected = false,
@@ -28,6 +33,13 @@ const PositionLabel = (props) => {
             y = 0
         } = {}
     } = props;
+
+    const msg = `{ "x": ${props.position.x}, "y": ${props.position.y}}`
+    if (WS.readyState === WS.OPEN) {
+        WS.send(msg);
+    } else {
+        console.log("WebSocket isn't open yet");
+    }
 
     return (
         <div className="example__label">
