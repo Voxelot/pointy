@@ -1,3 +1,9 @@
 .App {
   text-align: center;
+  height: 200px;
+  width: 200px;
+  background-color: lightgray;
+  margin-left: 30%;
+  margin-right: 30%;
+  margin-top: 1%;
 }

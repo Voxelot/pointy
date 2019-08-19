@@ -35,7 +35,11 @@ const PositionLabel = (props) => {
         } = {}
     } = props;
 
-    const msg = `{ "Point": {"x": ${props.position.x / props.elementDimensions.width}, "y": ${props.position.y / props.elementDimensions.height}}}`
+    const msg = ` \
+        { "Point": { \
+        "x": ${props.position.x / props.elementDimensions.width}, \
+        "y": ${props.position.y / props.elementDimensions.height}}} \
+        `
     if (WS.readyState === WS.OPEN) {
         debounce(() => {
             WS.send(msg);
