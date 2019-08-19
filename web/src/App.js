@@ -5,7 +5,7 @@ import CursorTracker from './CursorTracker';
 function App() {
   return (
     <div className="App">
-      <CursorTracker/>
+      <CursorTracker />
     </div>
   );
 }

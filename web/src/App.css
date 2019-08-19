@@ -1,7 +1,9 @@
 .App {
   text-align: center;
-  height: 200px;
-  width: 200px;
+}
+.cursor-tracker {
+  height: 50vw;
+  width: 50vw;
   background-color: lightgray;
   margin-left: 30%;
   margin-right: 30%;
