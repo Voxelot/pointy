@@ -7,6 +7,9 @@ use actix_web_actors::ws;
 use actix_web::dev::Server;
 use crate::ActorSet;
 use std::sync::Arc;
+use crate::model::{Messages};
+use crate::model::Messages::Point;
+use crate::laser;
 
 /// How often heartbeat pings are sent
 const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);
@@ -19,6 +22,7 @@ struct MyWebSocket {
     /// Client must send ping at least once per 10 seconds (CLIENT_TIMEOUT),
     /// otherwise we drop connection.
     hb: Instant,
+    actor_set: Arc<ActorSet>
 }
 
 impl Actor for MyWebSocket {
@@ -43,7 +47,18 @@ impl StreamHandler<ws::Message, ws::ProtocolError> for MyWebSocket {
             ws::Message::Pong(_) => {
                 self.hb = Instant::now();
             }
-            ws::Message::Text(text) => ctx.text(text),
+            ws::Message::Text(text) =>  {
+                let message: Messages = serde_json::from_str(text.as_ref()).unwrap_or_default();
+                match message {
+                    Point(_) => {
+                        self.actor_set.laser_actor.do_send(message);
+                    },
+                    _ => {
+                        println!("unrecognized command {}", text);
+                    }
+                }
+                ctx.text(text)
+            },
             ws::Message::Binary(bin) => ctx.binary(bin),
             ws::Message::Close(_) => {
                 ctx.stop();
@@ -55,7 +70,10 @@ impl StreamHandler<ws::Message, ws::ProtocolError> for MyWebSocket {
 
 impl MyWebSocket {
     fn new(actor_set: Arc<ActorSet>) -> Self {
-        Self { hb: Instant::now() }
+        Self {
+            hb: Instant::now(),
+            actor_set
+        }
     }
 
     /// helper method that sends ping to client every second.

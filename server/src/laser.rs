@@ -1,13 +1,10 @@
-use super::model::Point;
+use crate::model::{Point, Messages};
 use actix::dev::{MessageResponse, ResponseChannel};
 use actix::prelude::*;
 
-enum Messages {
-    SendPoint { point: Point },
-}
-
-enum Responses {
+pub enum Responses {
     GotPoint,
+    UNKNOWN
 }
 
 impl<A, M> MessageResponse<A, M> for Responses
@@ -46,7 +43,13 @@ impl Handler<Messages> for LaserActor {
 
     fn handle(&mut self, msg: Messages, ctx: &mut Context<Self>) -> Self::Result {
         match msg {
-            Messages::SendPoint {point} => Responses::GotPoint,
+            Messages::Point(point) => {
+                println!("drawing point {}", serde_json::to_string(&point).unwrap());
+                Responses::GotPoint
+            },
+            _ => {
+                Responses::UNKNOWN
+            }
         }
     }
 }
