@@ -39,7 +39,7 @@ const PositionLabel = (props) => {
     if (WS.readyState === WS.OPEN) {
         debounce(() => {
             WS.send(msg);
-        }, 50)();
+        }, 5)();
     } else {
         console.log("WebSocket isn't open yet");
     }

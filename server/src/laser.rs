@@ -38,7 +38,7 @@ fn laser(laser: &mut Laser, buffer: &mut laser::Buffer) {
         // Many lasers have a feature called "scan fail safety" (SFS) where the beam will
         // automatically cut out if the scanner is not moving for safety.
         // To avoid cutting out, we'll offset the point slightly to make a diamond shape.
-        let offset = 0.125;
+        let offset = 0.0;
         match laser.point_idx % 4 {
             0 => point.position[0] += offset * 0.5,
             1 => point.position[1] += offset * 0.5,
@@ -94,8 +94,8 @@ impl Handler<Messages> for LaserActor {
                 println!("drawing point {}", serde_json::to_string(&point).unwrap());
                 let laser_rect = geom::Rect::from_w_h(2.0f32, 2.0f32);
                 let point_rect = geom::Rect::from_w_h(1.0f32, 1.0f32);
-                let x = point_rect.x.map_value(point.x, &laser_rect.x);
-                let y = point_rect.y.map_value(point.y, &laser_rect.y);
+                let x = point_rect.x.map_value(-point.x+0.5, &laser_rect.x);
+                let y = point_rect.y.map_value(-point.y+0.5, &laser_rect.y);
                 if let Some(laser_stream) = &self.laser_stream {
                     laser_stream.send(move |laser| {
                         laser.position = pt2(x, y);
