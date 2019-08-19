@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactCursorPosition from 'react-cursor-position';
+import {debounce} from './lib';
 
 const URL = 'ws://localhost:8080/ws/';
 const WS = new WebSocket(URL);
@@ -34,9 +35,11 @@ const PositionLabel = (props) => {
         } = {}
     } = props;
 
-    const msg = `{ "x": ${props.position.x}, "y": ${props.position.y}}`
+    const msg = `{ "Point": {"x": ${props.position.x}, "y": ${props.position.y}}}`
     if (WS.readyState === WS.OPEN) {
-        WS.send(msg);
+        debounce(() => {
+            WS.send(msg);
+        }, 50)();
     } else {
         console.log("WebSocket isn't open yet");
     }
