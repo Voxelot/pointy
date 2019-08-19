@@ -2,14 +2,13 @@ use std::time::{Duration, Instant};
 
 use actix::prelude::*;
 use actix_files as fs;
-use actix_web::{middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer};
+use actix_web::{middleware, web, App, Error, HttpRequest, HttpServer};
 use actix_web_actors::ws;
 use actix_web::dev::Server;
 use crate::ActorSet;
 use std::sync::Arc;
 use crate::model::{Messages};
 use crate::model::Messages::Point;
-use crate::laser;
 
 /// How often heartbeat pings are sent
 const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);

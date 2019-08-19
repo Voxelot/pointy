@@ -35,7 +35,7 @@ const PositionLabel = (props) => {
         } = {}
     } = props;
 
-    const msg = `{ "Point": {"x": ${props.position.x}, "y": ${props.position.y}}}`
+    const msg = `{ "Point": {"x": ${props.position.x / props.elementDimensions.width}, "y": ${props.position.y / props.elementDimensions.height}}}`
     if (WS.readyState === WS.OPEN) {
         debounce(() => {
             WS.send(msg);
@@ -46,8 +46,8 @@ const PositionLabel = (props) => {
 
     return (
         <div className="example__label">
-            {`x: ${x}`}<br />
-            {`y: ${y}`}<br />
+            {`x: ${x / width}`}<br />
+            {`y: ${y / height}`}<br />
             {`width:: ${width}`}<br />
             {`height: ${height}`}<br />
             {`isActive: ${isActive}`}<br />

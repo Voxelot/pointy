@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 nannou="0.10.0"
+nannou_laser = "0.3"
 actix = "0.8.2"
 actix-web = "1.0.0"
 actix-web-actors = "1.0.0"
