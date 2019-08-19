@@ -1,22 +1,17 @@
 use std::time::{Duration, Instant};
 
 use actix::prelude::*;
+use actix_files as fs;
 use actix_web::{middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use actix_web_actors::ws;
-use actix_files as fs;
+use actix_web::dev::Server;
+use crate::ActorSet;
+use std::sync::Arc;
 
 /// How often heartbeat pings are sent
 const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);
 /// How long before lack of client response causes a timeout
 const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
-
-/// do websocket handshake and start `MyWebSocket` actor
-fn ws_index(r: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
-    println!("{:?}", r);
-    let res = ws::start(MyWebSocket::new(), &r, stream);
-    println!("{:?}", res.as_ref().unwrap());
-    res
-}
 
 /// websocket connection is long running connection, it easier
 /// to handle with an actor
@@ -58,9 +53,8 @@ impl StreamHandler<ws::Message, ws::ProtocolError> for MyWebSocket {
     }
 }
 
-
 impl MyWebSocket {
-    fn new() -> Self {
+    fn new(actor_set: Arc<ActorSet>) -> Self {
         Self { hb: Instant::now() }
     }
 
@@ -86,20 +80,25 @@ impl MyWebSocket {
     }
 }
 
-pub fn start() -> std::io::Result<()> {
-    std::env::set_var("RUST_LOG", "actix_server=info,actix_web=info");
-    env_logger::init();
-
-    HttpServer::new(|| {
+pub fn start(actor_set: ActorSet) -> Result<Server, Error> {
+    let actor_set: Arc<ActorSet> = Arc::new(actor_set);
+    let server = HttpServer::new(move || {
+        let actor_set = actor_set.clone();
         App::new()
             // enable logger
             .wrap(middleware::Logger::default())
             // websocket route
-            .service(web::resource("/ws/").route(web::get().to(ws_index)))
+            .service(web::resource("/ws/").route(web::get().to(move |r: HttpRequest, stream: web::Payload| {
+                println!("{:?}", r);
+                let res = ws::start(MyWebSocket::new(actor_set.clone()), &r, stream);
+                println!("{:?}", res.as_ref().unwrap());
+                res
+            })))
             // static files
             .service(fs::Files::new("/", "static/").index_file("index.html"))
     })
     // start http server on 127.0.0.1:8080
     .bind("127.0.0.1:8080")?
-    .run()
+    .start();
+    Ok(server)
 }
